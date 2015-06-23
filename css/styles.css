@@ -69,3 +69,32 @@ body {
     width: 200px;
 }
 
+#message-form textarea {
+    height: 100px;
+    width: 580px;
+    font-size: 16px;
+    line-height: 30px;
+    padding: 10px 20px;
+}
+
+#messages-container {
+    padding: 20px 0 0;
+}
+
+.message {
+    line-height: 26px;
+    padding: 0 0 20px;
+}
+
+.comment {
+    padding: 5px 0 10px 30px;
+}
+
+.comment textarea {
+    width: 550px;
+    padding: 10px 20px;
+}
+
+.comment p {
+    color: green;
+}

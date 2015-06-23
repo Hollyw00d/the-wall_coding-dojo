@@ -111,7 +111,7 @@ function register_user($post, $get_connection)
 
             $execute_insert_user = run_mysql_query($insert_user);
 
-            header('Location: ../logged-in.php');
+            header('Location: ../index.php');
 
         }
 
@@ -128,10 +128,6 @@ function login_user($post, $get_connection)
     // Create empty login_errors array, session variable
     $_SESSION['login_errors'] = [];
 
-    // Create an empty login_success array to be use as a log in token on the
-    // that will show a success message on the logged-in.php page
-    $_SESSION['login_success'] = 'login_success';
-
     // Set variables to insert into MySQL queries
     $email_sec = mysqli_real_escape_string($get_connection, $post['email']);
 
@@ -146,8 +142,14 @@ function login_user($post, $get_connection)
 
     if(count($execute_check_email_password_query) > 0)
     {
+        $_SESSION['user_id'] = $execute_check_email_password_query[0]['id'];
         $_SESSION['first_name_login'] = $execute_check_email_password_query[0]['first_name'];
         $_SESSION['last_name_login'] = $execute_check_email_password_query[0]['last_name'];
+
+        // Create an empty login_success array to be use as a log in token on the
+        // that will show a success message on the logged-in.php page
+        $_SESSION['login_success'] = 'login_success';
+
         header('Location: ../logged-in.php');
     }
     else
@@ -160,6 +162,87 @@ function login_user($post, $get_connection)
 
 }
 
+// User message function here
+function user_message($post, $get_connection)
+{
+    // Start blank messag_errors session assigned to empty array
+    $_SESSION['message_errors'] = [];
+
+    // Error checking for the message textarea field
+    if(!isset($post['post_message']) || $post['post_message'] == NULL)
+    {
+        $_SESSION['message_errors'][] = 'Please enter a comment.';
+    }
+    elseif(strlen($post['post_message']) < 2 || strlen($post['post_message']) > 160)
+    {
+        $_SESSION['message_errors'][] = 'Your message must at least be 2 characters and less than 160 characters.';
+    }
+
+    // Display errors if $message_errors array is NOT null
+    if($_SESSION['message_errors'] != NULL)
+    {
+
+        header('Location: ../logged-in.php');
+    }
+    else
+    {
+
+        $message_sec = mysqli_real_escape_string($get_connection, $post['post_message']);
+        $user_id_sec = mysqli_real_escape_string($get_connection, $_SESSION['user_id']);
+
+        // Insert message MySQL query
+        $insert_message = "INSERT INTO messages(message, created_at, updated_at, user_id)
+        VALUES ('$message_sec', NOW(), NOW(), $user_id_sec)";
+         $execute_insert_message = run_mysql_query($insert_message);
+
+        header('Location: ../logged-in.php');
+
+    }
+
+}
+
+
+// User message function here
+function user_comment($post, $get_connection)
+{
+
+    $comment_sec = mysqli_real_escape_string($get_connection, $post['post_comment']);
+    $message_id_sec = mysqli_real_escape_string($get_connection, $post['id']);
+
+
+    $insert_comment = "INSERT INTO comments(comment, created_at, updated_at, message_id, user_id)
+        VALUES ('$comment_sec', NOW(), NOW(), $message_id_sec, {$_SESSION['user_id']})";
+
+    $execute_insert_comment = run_mysql_query($insert_comment);
+
+
+    header('Location: ../logged-in.php');
+
+
+
+
+//    $check_email_password_query = "SELECT * FROM users WHERE users.email = '$email_sec' AND users.password = '$password_sec'";
+
+//    $message_query = "SELECT * FROM messages";
+
+    // Try to grab the user with above credentials
+//    $execute_check_email_password_query = fetch($check_email_password_query);
+
+//    if(count($execute_check_email_password_query) > 0)
+//    {
+//        $_SESSION['user_id'] = $execute_check_email_password_query[0]['id'];
+//        $_SESSION['first_name_login'] = $execute_check_email_password_query[0]['first_name'];
+//        $_SESSION['last_name_login'] = $execute_check_email_password_query[0]['last_name'];
+
+        // Create an empty login_success array to be use as a log in token on the
+        // that will show a success message on the logged-in.php page
+//        $_SESSION['login_success'] = 'login_success';
+//
+//        header('Location: ../logged-in.php');
+//    }
+
+
+}
 
 // If registered form submitted call the register_user function with
 // $_POST as the argument AND pass in the $connection variable to run MySQL queries
@@ -168,11 +251,22 @@ if(isset($_POST['action']) && $_POST['action'] == 'register')
     register_user($_POST, $connection);
 }
 
+// Call the login_user function if the login form is submitted
 if(isset($_POST['action']) && $_POST['action'] == 'login')
 {
     login_user($_POST, $connection);
 }
 
+// Call the user_message function if the message form is submitted
+if(isset($_POST['action']) && $_POST['action'] == 'message')
+{
+    user_message($_POST, $connection);
+}
 
+// Call the user_comment function if the comment form is submitted
+if(isset($_POST['action']) && $_POST['action'] == 'comment')
+{
+    user_comment($_POST, $connection);
+}
 
 ?>

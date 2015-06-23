@@ -47,6 +47,18 @@ require_once('includes/new-connection.php');
 
     </div>
 
+    <div class="success">
+    <?php
+    if(isset($_SESSION['first_name']) || $_SESSION['last_name']) {
+        ?>
+        <p><strong>Hello, <?php echo $_SESSION['first_name'] . ' ' . $_SESSION['last_name'] ?>. Thanks for registering!</strong></p>
+
+        <p><strong>Log in using the form below.</strong></p>
+    <?php
+    }
+    ?>
+    </div>
+
     <h3>Log In</h3>
 
     <form action="includes/process.php" method="post">
@@ -75,8 +87,6 @@ require_once('includes/new-connection.php');
         ?>
 
     </div>
-
-
 
     <p>&nbsp;</p>
     <p><a href="includes/reset.php">DESTROY SESSION</a></p>
